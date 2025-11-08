@@ -79,7 +79,7 @@ Local lnParameter, lcParameter, loParameters as Parameters of ParallelFox.vcx, l
 
 Debugout Time(0), Program()
 
-loParameters = NewObject("Parameters","ParallelFox.vcx")
+loParameters = NewObject("Parameters",This.ClassLibrary)
 loParameters.nPCount = lnPCount
 * AddProperty(loParameters, "nPCount", lnPCount)
 
@@ -185,6 +185,57 @@ Pixels[END RESERVED6]
 
 [ RECORD]
 [PLATFORM] WINDOWS 
+[UNIQUEID] _6NX0WQ2U6
+[CLASS] custom
+[BASECLASS] custom
+[OBJNAME] commandhandler
+[START PROPERTIES]
+Height = 16
+Name = "commandhandler"
+Width = 100
+_memberdata = <VFPData><memberdata name="ccommand" display="cCommand"/><memberdata name="executecommand" display="ExecuteCommand"/></VFPData>
+ccommand = 
+[END PROPERTIES]
+[START METHODS]
+PROCEDURE Destroy
+Debugout Time(0), Program()
+
+ENDPROC
+PROCEDURE executecommand
+* Simple event handler to execute one-line command when event fires.
+* Used by Parallel.BindEvent().
+Lparameters tPar1, tPar2, tPar3, tPar4, tPar5, tPar6, ;
+	tPar7, tPar8, tPar9, tPar10, tPar11, tPar12, tPar13, ;
+	tPar14, tPar15, tPar16, tPar17, tPar18, tPar19, tPar20, ;
+	tPar21, tPar22, tPar23, tPar24, tPar25, tPar26
+Local lcCommmand
+	
+Debugout Time(0), Program()
+
+lcCommand = This.cCommand
+&lcCommand
+
+ENDPROC
+[END METHODS]
+[START RESERVED1]
+Class[END RESERVED1]
+[START RESERVED2]
+1[END RESERVED2]
+[START RESERVED3]
+*executecommand Run command when event fires.
+_memberdata XML Metadata for customizable properties
+ccommand Command to execute when event fires.
+[END RESERVED3]
+[START RESERVED6]
+Pixels[END RESERVED6]
+
+[ RECORD]
+[PLATFORM] COMMENT 
+[UNIQUEID] RESERVED  
+[OBJNAME] commandhandler
+
+[ RECORD]
+[PLATFORM] WINDOWS 
 [UNIQUEID] _3CV0I1GR4
 [CLASS] custom
 [BASECLASS] custom
@@ -206,7 +257,7 @@ Lparameters lnError, lcMethod, lnLine, lcMessage, lcCode
 Local array laCallStack[1,6]
 Local lnRow, lnErrorRow, lcCallStack
 Local Worker as Worker
-Worker = NewObject("Worker", "ParallelFox.vcx")
+Worker = NewObject("Worker", This.ClassLibrary)
 
 * Add call stack to lcCode
 AStackInfo(laCallStack)
@@ -259,12 +310,23 @@ Pixels[END RESERVED6]
 [BASECLASS] custom
 [OBJNAME] events
 [START PROPERTIES]
-
 Name = "events"
-_memberdata =      581<VFPData><memberdata name="ncommands" display="nCommands"/><memberdata name="complete" display="Complete"/><memberdata name="updateprogress" display="UpdateProgress"/><memberdata name="returndata" display="ReturnData"/><memberdata name="returnerror" display="ReturnError"/><memberdata name="updatecommandcount" display="UpdateCommandCount"/><memberdata name="loadcursor" display="LoadCursor"/><memberdata name="returncursor" display="ReturnCursor"/><memberdata name="setdatasession" display="SetDataSession"/><memberdata name="getdatasession" display="GetDataSession"/></VFPData>
+_memberdata =      683<VFPData><memberdata name="ncommands" display="nCommands"/><memberdata name="complete" display="Complete"/><memberdata name="updateprogress" display="UpdateProgress"/><memberdata name="returndata" display="ReturnData"/><memberdata name="returnerror" display="ReturnError"/><memberdata name="updatecommandcount" display="UpdateCommandCount"/><memberdata name="loadcursor" display="LoadCursor"/><memberdata name="returncursor" display="ReturnCursor"/><memberdata name="setdatasession" display="SetDataSession"/><memberdata name="getdatasession" display="GetDataSession"/><memberdata name="ohandlers" display="oHandlers"/><memberdata name="iscancelled" display="IsCancelled"/></VFPData>
+iscancelled = .F.
 ncommands = 0
+ohandlers = .NULL.
 [END PROPERTIES]
 [START METHODS]
+PROCEDURE Destroy
+Debugout Time(0), Program()
+
+If !IsNull(This.oHandlers) and This.oHandlers.Count > 0
+	This.oHandlers.Remove(-1)	&& remove all simple event handlers from collection
+EndIf 
+ENDPROC
+PROCEDURE Init
+This.oHandlers = CreateObject("Collection")
+ENDPROC
 PROCEDURE complete
 Lparameters lvReturn
 
@@ -377,7 +439,9 @@ Class[END RESERVED1]
 *updatecommandcount Update number of commands currently running.
 *updateprogress Fires when Worker.UpdateProgress() is called on worker.
 _memberdata XML Metadata for customizable properties
+iscancelled Is set to .T. when cancellation is requested by main process.
 ncommands Number of commands currently queued or running.
+ohandlers Collection to keep event handlers in scope.
 [END RESERVED3]
 [START RESERVED6]
 Pixels[END RESERVED6]
@@ -540,7 +604,7 @@ Pixels[END RESERVED6]
 [START PROPERTIES]
 Name = "parallel"
 _events = NULL
-_memberdata =      997<VFPData><memberdata name="do" display="Do"/><memberdata name="startworkers" display="StartWorkers"/><memberdata name="cpucount" display="CPUCount"/><memberdata name="setworkercount" display="SetWorkerCount"/><memberdata name="docmd" display="DoCmd"/><memberdata name="execscript" display="ExecScript"/><memberdata name="call" display="Call"/><memberdata name="bindevent" display="BindEvent"/><memberdata name="wait" display="Wait"/><memberdata name="_events" display="_Events"/><memberdata name="callmethod" display="CallMethod"/><memberdata name="stopworkers" display="StopWorkers"/><memberdata name="onerror" display="OnError"/><memberdata name="clearqueue" display="ClearQueue"/><memberdata name="setworkerclass" display="SetWorkerClass"/><memberdata name="detecthyperthreading" display="DetectHyperThreading"/><memberdata name="setmultithreaded" display="SetMultiThreaded"/><memberdata name="oparpoolmgr" display="oParPoolMgr"/><memberdata name="setinstance" display="SetInstance"/></VFPData>
+_memberdata =     1223<VFPData><memberdata name="do" display="Do"/><memberdata name="startworkers" display="StartWorkers"/><memberdata name="cpucount" display="CPUCount"/><memberdata name="setworkercount" display="SetWorkerCount"/><memberdata name="docmd" display="DoCmd"/><memberdata name="execscript" display="ExecScript"/><memberdata name="call" display="Call"/><memberdata name="bindevent" display="BindEvent"/><memberdata name="wait" display="Wait"/><memberdata name="_events" display="_Events"/><memberdata name="callmethod" display="CallMethod"/><memberdata name="stopworkers" display="StopWorkers"/><memberdata name="onerror" display="OnError"/><memberdata name="clearqueue" display="ClearQueue"/><memberdata name="setworkerclass" display="SetWorkerClass"/><memberdata name="detecthyperthreading" display="DetectHyperThreading"/><memberdata name="setmultithreaded" display="SetMultiThreaded"/><memberdata name="oparpoolmgr" display="oParPoolMgr"/><memberdata name="setinstance" display="SetInstance"/><memberdata name="createtemptable" display="CreateTempTable"/><memberdata name="deletetemptable" display="DeleteTempTable"/><memberdata name="cancel" display="Cancel"/><memberdata name="setregfreecom" display="SetRegFreeCOM"/></VFPData>
 cpucount = 0
 oparpoolmgr = .NULL.
 [END PROPERTIES]
@@ -552,7 +616,6 @@ PROCEDURE Destroy
 Debugout Time(0), Program()
 
 UnBindEvents(This)
-
 ENDPROC
 PROCEDURE Init
 * Instantiate default parallel pool manager
@@ -560,13 +623,14 @@ This.SetInstance()
 
 This.CPUCount = This.oParPoolMgr.nCPUCount
 
-This._Events = NewObject("Events", "ParallelFox.vcx")
+This._Events = NewObject("Events", This.ClassLibrary)
 This.BindEvent("ReturnError", This.oParPoolMgr, "HandleError")
 
 ENDPROC
 PROCEDURE bindevent
 * Bind to worker events
-Lparameters cEvent, oEventHandler, cDelegate, nFlags
+Lparameters cEvent, oEventHandlerOrCommand, cDelegate, nFlags
+Local loCommandHandler as CommandHandler of ParallelFox.vcx
 
 Debugout Time(0), Program(), cEvent, cDelegate
 
@@ -578,7 +642,15 @@ If Upper(cEvent) = "RETURNERROR"
 	UnBindEvents(This._Events, "ReturnError", This.oParPoolMgr, "HandleError")
 EndIf 
 
-BindEvent(This._Events, cEvent, oEventHandler, cDelegate, nFlags)
+If Vartype(oEventHandlerOrCommand) = "C"
+	* Use simple handler to execute one line of code when event fires
+	loCommandHandler = NewObject("CommandHandler", This.ClassLibrary)
+	loCommandHandler.cCommand = oEventHandlerOrCommand
+	BindEvent(This._Events, cEvent, loCommandHandler, "ExecuteCommand", nFlags)
+	This._Events.oHandlers.Add(loCommandHandler) && keep handler in scope
+Else 
+	BindEvent(This._Events, cEvent, oEventHandlerOrCommand, cDelegate, nFlags)
+EndIf 
 
 
 ENDPROC
@@ -632,12 +704,63 @@ This.oParPoolMgr.QueueCommand("CallMethod", cMethod, cClassName, cModule, cInApp
 	loParameters, lAllWorkers, This._Events)
 
 ENDPROC
+PROCEDURE cancel
+* Clear remaining queue and set IsCancelled property for all workers
+
+Debugout Time(0), Program()
+
+This.oParPoolMgr.Cancel()
+ENDPROC
 PROCEDURE clearqueue
 * Remove all pending commands from queue.
 
 Debugout Time(0), Program()
 
 This.oParPoolMgr.ClearQueue()
+ENDPROC
+PROCEDURE createtemptable
+* Create temporary table that can be used by workers with Worker.OpenTempTable()
+Lparameters cAlias
+Local lcTempTable
+
+cAlias = Evl(cAlias, Alias())
+
+Do while .t.
+	lcTempTable = Addbs(Sys(2023)) + Alltrim(cAlias) + Sys(2015) + "_" + Transform(_VFP.ThreadId)
+	If !File(lcTempTable + ".DBC") and !File(lcTempTable + ".DBF")
+		Exit && filename is good
+	EndIf 
+EndDo 
+
+* Could have long field names in cursor, so create database
+lcDBC = Dbc()
+Create Database (lcTempTable + ".DBC")
+
+Select (cAlias)
+Copy To (lcTempTable) DATABASE (lcTempTable)
+
+* Database is opened exclusively, so close it
+Set Database To (lcTempTable)
+Close Databases
+Set Database To (lcDBC)
+
+Return JustFname(lcTempTable)
+ENDPROC
+PROCEDURE deletetemptable
+* Delete temporary table previously created with CreateTempTable()
+* Make sure Worker.CloseTempTable() is used to close table/DBC in workers before deleting
+Lparameters cTempTable
+Local lcSafety, lcTempFiles
+
+lcSafety = Set("Safety")
+Try
+	Set Safety Off
+	lcTempFiles = Addbs(Sys(2023)) + Alltrim(cTempTable) + ".*"
+	Erase (lcTempFiles)
+Finally
+	Set Safety &lcSafety
+EndTry 
+
 ENDPROC
 PROCEDURE detecthyperthreading
 * Returns .T. when HyperThreading is Enabled.
@@ -727,7 +850,7 @@ EndIf
 If _Screen.ParPoolMgrs.GetKey(cInstanceName) > 0
 	This.oParPoolMgr = _Screen.ParPoolMgrs.Item(cInstanceName)
 Else 
-	This.oParPoolMgr = NewObject("ParPoolMgr", "ParallelFox.vcx", "", cInstanceName)
+	This.oParPoolMgr = NewObject("ParPoolMgr", This.ClassLibrary, "", cInstanceName)
 	_Screen.ParPoolMgrs.Add(This.oParPoolMgr, cInstanceName)
 EndIf 
 
@@ -739,6 +862,17 @@ Lparameters lMTDLL
 
 This.oParPoolMgr.lMTDLL = lMTDLL
 
+ENDPROC
+PROCEDURE setregfreecom
+* Set .T. to use out-of-process COM EXE without requiring registration. 
+* Does not apply to debug mode or in-process MTDLL.
+* Include path to EXE if not in current path
+Lparameters lRegFreeCOM, cRegFreePath
+
+This.oParPoolMgr.lRegFreeCOM = lRegFreeCOM
+If !Empty(cRegFreePath)
+	This.cRegFreePath = cRegFreePath
+EndIf 
 ENDPROC
 PROCEDURE setworkerclass
 * Change worker class from default. lcClass and lcLibrary are used in debug mode.
@@ -828,7 +962,10 @@ Class[END RESERVED1]
 *bindevent Bind to worker events: "Complete", "UpdateProgress", "ReturnData", "ReturnError".
 *call Execute/call function on worker.
 *callmethod Execute/call class method on worker.
+*cancel Clear remaining queue and set IsCancelled property for all workers.
 *clearqueue Remove all pending commands from queue.
+*createtemptable Create temporary table that can be used by workers with Worker.OpenTempTable().
+*deletetemptable Delete temporary table previously created with CreateTempTable(). Make sure Worker.CloseTempTable() is used to close table/DBC in workers.
 *detecthyperthreading Returns .T. when HyperThreading is enabled.
 *do Execute program on worker.
 *docmd Execute single command on worker.
@@ -836,6 +973,7 @@ Class[END RESERVED1]
 *onerror Set up global handler for worker errors. Available variables are nError, cMethod, nLine, cMessage, cCode. Example: Parallel.OnError("Do MyErrorHandler with nError, cMethod, nLine, cMessage, cCode")
 *setinstance Set instance of parallel pool manager, creating new instance if necessary.
 *setmultithreaded Set .T. to use in-process multithreaded DLL workers. Otherwise, out-of-process EXEs are used.
+*setregfreecom Set .T. to use out-of-process COM EXE without requiring registration. Does not apply to debug mode or in-process MTDLL.
 *setworkerclass Change worker class from default. lcClass and lcLibrary are used in debug mode.
 *setworkercount Set number of workers. Defaults to CPU count. Set before starting workers.
 *startworkers Start worker processes.
@@ -919,15 +1057,17 @@ Pixels[END RESERVED6]
 [OBJNAME] parpoolmgr
 [START PROPERTIES]
 Name = "parpoolmgr"
-_memberdata =     1217<VFPData><memberdata name="ncpucount" display="nCPUCount"/><memberdata name="nworkercount" display="nWorkerCount"/><memberdata name="startworkers" display="StartWorkers"/><memberdata name="workers" display="Workers"/><memberdata name="nbusyworkers" display="nBusyWorkers"/><memberdata name="queuecommand" display="QueueCommand"/><memberdata name="processqueue" display="ProcessQueue"/><memberdata name="commandqueue" display="CommandQueue"/><memberdata name="ldebugmode" display="lDebugMode"/><memberdata name="stopworkers" display="StopWorkers"/><memberdata name="handleerror" display="HandleError"/><memberdata name="conerror" display="cOnError"/><memberdata name="clearqueue" display="ClearQueue"/><memberdata name="cworkercomprogid" display="cWorkerCOMProgID"/><memberdata name="cworkerclass" display="cWorkerClass"/><memberdata name="cworkerlibrary" display="cWorkerLibrary"/><memberdata name="nprocessing" display="nProcessing"/><memberdata name="setworkercount" display="SetWorkerCount"/><memberdata name="displayerrors" display="DisplayErrors"/><memberdata name="oerrorlist" display="oErrorList"/><memberdata name="lmtdll" display="lMTDLL"/><memberdata name="cinstancename" display="cInstanceName"/></VFPData>
+_memberdata =     1371<VFPData><memberdata name="ncpucount" display="nCPUCount"/><memberdata name="nworkercount" display="nWorkerCount"/><memberdata name="startworkers" display="StartWorkers"/><memberdata name="workers" display="Workers"/><memberdata name="nbusyworkers" display="nBusyWorkers"/><memberdata name="queuecommand" display="QueueCommand"/><memberdata name="processqueue" display="ProcessQueue"/><memberdata name="commandqueue" display="CommandQueue"/><memberdata name="ldebugmode" display="lDebugMode"/><memberdata name="stopworkers" display="StopWorkers"/><memberdata name="handleerror" display="HandleError"/><memberdata name="conerror" display="cOnError"/><memberdata name="clearqueue" display="ClearQueue"/><memberdata name="cworkercomprogid" display="cWorkerCOMProgID"/><memberdata name="cworkerclass" display="cWorkerClass"/><memberdata name="cworkerlibrary" display="cWorkerLibrary"/><memberdata name="nprocessing" display="nProcessing"/><memberdata name="setworkercount" display="SetWorkerCount"/><memberdata name="displayerrors" display="DisplayErrors"/><memberdata name="oerrorlist" display="oErrorList"/><memberdata name="lmtdll" display="lMTDLL"/><memberdata name="cinstancename" display="cInstanceName"/><memberdata name="cancel" display="Cancel"/><memberdata name="lregfreecom" display="lRegFreeCOM"/><memberdata name="cregfreepath" display="cRegFreePath"/></VFPData>
 cinstancename = 
 commandqueue = 
 conerror = This.DisplayErrors(nError, cMethod, nLine, cMessage, cCode)
+cregfreepath = 
 cworkerclass = WorkerMgr
 cworkercomprogid = ParallelFox.WorkerMgr
 cworkerlibrary = ParallelFox.vcx
 ldebugmode = .F.
 lmtdll = .F.
+lregfreecom = .F.
 nbusyworkers = 0
 ncpucount = 0
 nprocessing = 0
@@ -953,6 +1093,18 @@ This.CommandQueue = CreateObject("Collection")
 
 Return DoDefault()
 ENDPROC
+PROCEDURE cancel
+* Clear remaining queue and set IsCancelled property for all workers
+Local loWorkerProxy as WorkerProxy of ParallelFox.vcx
+
+Debugout Time(0), Program()
+
+This.ClearQueue()
+
+For each loWorkerProxy in This.Workers FoxObject
+	loWorkerProxy.oEvents.IsCancelled = .t.
+EndFor 
+ENDPROC
 PROCEDURE clearqueue
 * Remove all pending commands from queue.
 
@@ -968,7 +1120,7 @@ PROCEDURE displayerrors
 Lparameters lnError, lcMethod, lnLine, lcMessage, lcCode
 
 If Vartype(This.oErrorList) <> "O" or IsNull(This.oErrorList)
-	This.oErrorList = NewObject("frmErrorList", "ParallelFox.vcx")
+	This.oErrorList = NewObject("frmErrorList", This.ClassLibrary)
 	This.oErrorList.Show()
 EndIf 
 
@@ -1005,7 +1157,6 @@ EndIf
 
 * Prevent error if run in the middle of CLEAR ALL
 If Type("This.Workers.Count") = "U" or Type("This.CommandQueue.Count") = "U"
-	? "Exiting ProcessQueue"
 	Return 
 EndIf 
 
@@ -1121,7 +1272,7 @@ EndIf
 
 For lnWorker = 1 to lnWorkerCnt 
 	* Create command object
-	loCommand = NewObject("Command", "ParallelFox.vcx")
+	loCommand = NewObject("Command", This.ClassLibrary)
 	loCommand.cCommandType = Evl(lcCommandType, "")
 	loCommand.cCommand = Evl(lcCommand, "")
 	loCommand.cClass = Evl(lcClass, "")
@@ -1161,7 +1312,7 @@ PROCEDURE startworkers
 * Start worker processes
 * Same EXE is used for all workers
 Lparameters lcProcedureFile, lcDirectory, llDebugMode
-Local lnWorker, loWorkerProxy as WorkerProxy of ParallelFox.vcx
+Local lnWorker, loWorkerProxy as WorkerProxy of ParallelFox.vcx, lcWOnTop
 
 Debugout Time(0), Program(), lcProcedureFile, lcDirectory, llDebugMode
 
@@ -1172,11 +1323,18 @@ EndIf
 
 This.lDebugMode = llDebugMode
 
+lcWOnTop = Wontop()
+
 For lnWorker = 1 to This.nWorkerCount
-	loWorkerProxy = NewObject("WorkerProxy", "ParallelFox.vcx", "", lcProcedureFile, lcDirectory, llDebugMode, lnWorker, This.lMTDLL, This)
+	loWorkerProxy = NewObject("WorkerProxy", This.ClassLibrary, "", lcProcedureFile, lcDirectory, llDebugMode, lnWorker, This.lMTDLL, This)
 	ComArray(loWorkerProxy, 11)
 	This.Workers.Add(loWorkerProxy)
 EndFor 
+
+* Restore active window if focus was lost when workers started
+If !(Wontop() == lcWOnTop)
+	Activate Window (lcWOnTop)
+EndIf
 
 ENDPROC
 PROCEDURE stopworkers
@@ -1204,6 +1362,7 @@ Class[END RESERVED1]
 [START RESERVED2]
 1[END RESERVED2]
 [START RESERVED3]
+*cancel Clear remaining queue and set IsCancelled property for all workers.
 *clearqueue Remove all pending commands from queue.
 *displayerrors Default error handler displays list of errors from workers.
 *handleerror Global Error Handler.
@@ -1215,11 +1374,13 @@ Class[END RESERVED1]
 cinstancename Name of current pool manager instance.
 commandqueue Command queue collection.
 conerror On Error command.
+cregfreepath Path to registration-free COM EXE if not in current path.
 cworkerclass Worker class name (used in debug mode).
 cworkercomprogid COM ProgID for worker class.
 cworkerlibrary Worker class library (used in debug mode).
 ldebugmode Start workers in Debug mode.
 lmtdll Set .T. to use in-process multithreaded DLL workers. Otherwise, out-of-process EXEs are used.
+lregfreecom Set .T. to use out-of-process COM EXE without requiring registration. Does not apply to debug mode or in-process MTDLL.
 nbusyworkers Number of workers currently processing commands.
 ncpucount Number of logical processors on machine.
 nprocessing Number of times ProcessQueue has been called.
@@ -1364,6 +1525,7 @@ ENDPROC
 PROCEDURE startthread
 * Start thread for MTDLL worker
 Lparameters lcDirectory, lcWorkerClass, lcWorkerVCX, lcWorkerApp, lcProcedureFile
+lcProcedureFile = EVL(lcProcedureFile, "")
 
 * Start startup script for MTDLL worker
 Text to This.cMTScript TEXTMERGE NOSHOW 
@@ -1511,7 +1673,7 @@ Pixels[END RESERVED6]
 [START PROPERTIES]
 Name = "worker"
 _lastprogressupdate = 0
-_memberdata =      719<VFPData><memberdata name="updateprogress" display="UpdateProgress"/><memberdata name="progressinterval" display="ProgressInterval"/><memberdata name="_lastprogressupdate" display="_LastProgressUpdate"/><memberdata name="returndata" display="ReturnData"/><memberdata name="startcriticalsection" display="StartCriticalSection"/><memberdata name="endcriticalsection" display="EndCriticalSection"/><memberdata name="_criticalsections" display="_CriticalSections"/><memberdata name="sleep" display="Sleep"/><memberdata name="cpucount" display="CPUCount"/><memberdata name="returnerror" display="ReturnError"/><memberdata name="isworker" display="IsWorker"/><memberdata name="returncursor" display="ReturnCursor"/></VFPData>
+_memberdata =      891<VFPData><memberdata name="updateprogress" display="UpdateProgress"/><memberdata name="progressinterval" display="ProgressInterval"/><memberdata name="_lastprogressupdate" display="_LastProgressUpdate"/><memberdata name="returndata" display="ReturnData"/><memberdata name="startcriticalsection" display="StartCriticalSection"/><memberdata name="endcriticalsection" display="EndCriticalSection"/><memberdata name="_criticalsections" display="_CriticalSections"/><memberdata name="sleep" display="Sleep"/><memberdata name="cpucount" display="CPUCount"/><memberdata name="returnerror" display="ReturnError"/><memberdata name="isworker" display="IsWorker"/><memberdata name="returncursor" display="ReturnCursor"/><memberdata name="opentemptable" display="OpenTempTable"/><memberdata name="closetemptable" display="CloseTempTable"/><memberdata name="iscancelled" display="IsCancelled"/></VFPData>
 cpucount = 0
 progressinterval = 1
 [END PROPERTIES]
@@ -1556,6 +1718,25 @@ DECLARE INTEGER ReleaseMutex IN kernel32;
 
 
 ENDPROC
+PROCEDURE closetemptable
+* Close temporary table and associated DBC
+Lparameters cAlias
+Local lnCurrentArea, lcCurrentDBC, lcDBC
+
+If Used(cAlias)
+	lnCurrentArea = Select()
+	lcCurrentDBC = Dbc()
+	Select (cAlias)
+	lcDBC = CursorGetProp("Database")
+	Use
+	Set Database To (lcDBC)
+	Close Databases
+	Set Database To (lcCurrentDBC)
+	Select (lnCurrentArea)
+EndIf 
+
+
+ENDPROC
 PROCEDURE endcriticalsection
 * End Critical Section of code.
 Lparameters cCriticalSectionName
@@ -1573,10 +1754,25 @@ If lnRow <> 0
 	Adel(This._CriticalSections, lnRow)
 EndIf 
 ENDPROC
+PROCEDURE iscancelled
+* Returns .T. if cancellation requested in main process
+
+Return _Screen.oWorkerEvents.IsCancelled
+ENDPROC
 PROCEDURE isworker
 * Returns .T. if currently running in Worker process.
 
 Return Type("_Screen.oWorkerEvents") = "O"
+ENDPROC
+PROCEDURE opentemptable
+* Open temporary table created in main process
+Lparameters cTempTable, cAlias
+
+cAlias = Evl(cAlias, cTempTable)
+
+Select 0
+Use (Addbs(Sys(2023)) + cTempTable) Alias (cAlias) Shared
+
 ENDPROC
 PROCEDURE returncursor
 * Return cursor to main process.
@@ -1722,8 +1918,11 @@ Class[END RESERVED1]
 [START RESERVED2]
 1[END RESERVED2]
 [START RESERVED3]
+*closetemptable Close temporary table and associated DBC.
 *endcriticalsection End Critical Section of code.
+*iscancelled Returns .T. if cancellation requested in main process.
 *isworker Returns .T. if currently running in Worker process.
+*opentemptable Open temporary table created in main process.
 *returncursor Return cursor to main process.
 *returndata Return data to main process. Due to limitations with VFP BindEvent(), arrays are not supported and cannot be returned.
 *returnerror Return error to main process.
@@ -1775,17 +1974,19 @@ EndIf
 ENDPROC
 PROCEDURE Init
 _VFP.Caption = "ParallelFox Worker"
+* Make sure ParallelFox.vcx can be found in workers
+Set Path To (JustPath(This.ClassLibrary)) Additive
 * Set Unattended mode unless in debug mode
 * Make sure an error handler is in place on worker or displaying UI 
 *	can cause worker to crash.
 If _VFP.StartMode > 1
 	Sys(2335,0)
 	* Default error handler
-	_Screen.NewObject("oErrorHandler", "ErrorHandler", "ParallelFox.vcx")
+	_Screen.NewObject("oErrorHandler", "ErrorHandler", This.ClassLibrary)
 EndIf 
 Set TablePrompt Off
 If _VFP.StartMode <> 5
-	This.oCmdTimer = NewObject("tmrCommand", "ParallelFox.vcx")
+	This.oCmdTimer = NewObject("tmrCommand", This.ClassLibrary)
 EndIf 
 
 Return DoDefault()
@@ -2058,7 +2259,7 @@ Pixels[END RESERVED6]
 Height = 16
 Name = "workerproxy"
 Width = 99
-_memberdata =      775<VFPData><memberdata name="lbusy" display="lBusy"/><memberdata name="oworker" display="oWorker"/><memberdata name="sendcommand" display="SendCommand"/><memberdata name="complete" display="Complete"/><memberdata name="llocked" display="lLocked"/><memberdata name="ldebugmode" display="lDebugMode"/><memberdata name="stopworker" display="StopWorker"/><memberdata name="handleerror" display="HandleError"/><memberdata name="oevents" display="oEvents"/><memberdata name="oapplication" display="oApplication"/><memberdata name="lcomplete" display="lComplete"/><memberdata name="nworkernum" display="nWorkerNum"/><memberdata name="lmtdll" display="lMTDLL"/><memberdata name="othreadhandler" display="oThreadHandler"/><memberdata name="oparpoolmgr" display="oParPoolMgr"/></VFPData>
+_memberdata =      831<VFPData><memberdata name="lbusy" display="lBusy"/><memberdata name="oworker" display="oWorker"/><memberdata name="sendcommand" display="SendCommand"/><memberdata name="complete" display="Complete"/><memberdata name="llocked" display="lLocked"/><memberdata name="ldebugmode" display="lDebugMode"/><memberdata name="stopworker" display="StopWorker"/><memberdata name="handleerror" display="HandleError"/><memberdata name="oevents" display="oEvents"/><memberdata name="oapplication" display="oApplication"/><memberdata name="lcomplete" display="lComplete"/><memberdata name="nworkernum" display="nWorkerNum"/><memberdata name="lmtdll" display="lMTDLL"/><memberdata name="othreadhandler" display="oThreadHandler"/><memberdata name="oparpoolmgr" display="oParPoolMgr"/><memberdata name="isregistered" display="IsRegistered"/></VFPData>
 lbusy = .F.
 lcomplete = .F.
 ldebugmode = .F.
@@ -2091,24 +2292,50 @@ EndIf
 ENDPROC
 PROCEDURE Init
 * Create worker process
-Lparameters lcProcedureFile, lcDirectory, llDebugMode, lnWorkerNum, llMTDLL, loParPoolMgr
+Lparameters lcProcedureFile, lcDirectory, llDebugMode, lnWorkerNum, llMTDLL, loParPoolMgr, ;
+	lcParallelFoxProgID, lcRegFreeClassID, lcRegFreeParallelFox, lcVFPProgID, lcMTDLLProgID 
 Local lhWndForeground
 Local loVFP as VisualFoxPro.Application, lcWorkerVCX, lcWorkerAPP, lcWorkerCmd
 
 Debugout Time(0), "(" + Transform(lnWorkerNum) + ")", Program(), lcProcedureFile, lcDirectory, llDebugMode, llMTDLL
 
+#DEFINE PARALLELFOX_CLSID "{76DE0CE0-CE45-491B-9EDF-6F91CDBD9880}"
+#DEFINE PARALLELFOXA_CLSID "{2080588E-D21B-4ACE-A1DF-761CF2A296D5}"
+#DEFINE PARALLELFOX64_CLSID "{EF323FE2-C5E2-448B-A6A6-0BDE249849D3}"
+
 This.lMTDLL = llMTDLL
 This.oParPoolMgr = loParPoolMgr
 
-* In Windows XP and earlier, main process can lose focus when 
-*	instantiating COM EXE. Make sure we keep it.
-DECLARE INTEGER GetForegroundWindow IN user32
-lhWndForeground = GetForegroundWindow()
-
+Do Case
+Case Version(5) >= 1000 and _Win64 = .t.	&& VFP Advanced 64-bit
+	* VFPA64 workers crash, probably when calling back into main process. More testing required.
+	ERROR "ParallelFox is not functional with VFP Advanced 64-bit version."
+	lcVFPProgID = "VisualFoxpro.Application.a"
+	lcParallelFoxProgID = "ParallelFox64.Application"
+	lcRegFreeParallelFox = Evl(This.oParPoolMgr.cRegFreePath, "ParallelFox64.exe")
+	lcRegFreeClassID = PARALLELFOX64_CLSID 
+	* MTDLL crashes due to problems with ExecScript(), so use VFP9 version for now
+*	lcMTDLLProgID = "ParallelFoxMTA.Application"
+	lcMTDLLProgID = "ParallelFoxMT.Application"
+Case Version(5) >= 1000	&& VFP Advanced 32-bit
+	lcVFPProgID = "VisualFoxpro.Application.a"
+	lcParallelFoxProgID = "ParallelFoxA.Application"
+	lcRegFreeParallelFox = Evl(This.oParPoolMgr.cRegFreePath, "ParallelFoxA.exe")
+	lcRegFreeClassID = PARALLELFOXA_CLSID 
+	* MTDLL crashes due to problems with ExecScript(), so use VFP9 version for now
+*	lcMTDLLProgID = "ParallelFoxMTA.Application"
+	lcMTDLLProgID = "ParallelFoxMT.Application"
+Otherwise	&& VFP 9.0
+	lcVFPProgID = "VisualFoxPro.Application." + SUBSTR(VERSION(4),2,1)
+	lcParallelFoxProgID = "ParallelFox.Application"
+	lcRegFreeParallelFox = Evl(This.oParPoolMgr.cRegFreePath, "ParallelFox.exe")
+	lcRegFreeClassID = PARALLELFOX_CLSID 
+	lcMTDLLProgID = "ParallelFoxMT.Application"
+EndCase 
 This.nWorkerNum = lnWorkerNum
 * Debug mode starts workers in full VFP.
 If llDebugMode and _VFP.StartMode = 0
-	loVFP = CreateObject("VisualFoxPro.Application." + SUBSTR(VERSION(4),2,1))
+	loVFP = CreateObject(lcVFPProgID)
 	loVFP.Visible = .t.
 	This.lDebugMode = .t.
 	This.lMTDLL = .f.
@@ -2116,7 +2343,23 @@ Else
 	* Must maintain reference to Application object, or COM instance will close even though we also 
 	*	have reference to Worker object.
 	If !This.lMTDLL
-		This.oApplication = CreateObject("ParallelFox.Application")
+		* Prevent worker EXE from stealing focus
+		DECLARE INTEGER LockSetForegroundWindow IN user32 INTEGER uLockCode
+		LockSetForegroundWindow(1) && lock		
+		If !This.oParPoolMgr.lRegFreeCOM && This.IsRegistered(lcParallelFoxProgID) or !File(lcRegFreeParallelFox)
+			* Instantiate registered COM object
+			This.oApplication = CreateObject(lcParallelFoxProgID)
+		Else 
+			* Use reg-free COM to launch ParallelFox COM Server
+			If !File(lcRegFreeParallelFox)
+				Error 1, lcRegFreeParallelFox
+			EndIf 
+			Local lcRun
+			lcRun = [Run /n "] + FullPath(lcRegFreeParallelFox) + [" /automation -Embedding]
+			&lcRun
+			This.oApplication = CreateObjectEx(lcRegFreeClassID, GetEnv("COMPUTERNAME"))
+		EndIf 
+		LockSetForegroundWindow(2) && unlock
 		loVFP = This.oApplication.VFP
 	EndIf 
 	lcWorkerVCX = FullPath(This.oParPoolMgr.cWorkerLibrary)
@@ -2130,7 +2373,7 @@ Else
 EndIf 
 
 * Set up worker events
-This.oEvents = NewObject("Events", "ParallelFox.vcx")
+This.oEvents = NewObject("Events", This.ClassLibrary)
 This.oEvents.Name = "WorkerProxyEvents"	&& to distinguish object from other events objects during debugging
 BindEvent(This.oEvents, "Complete", This, "Complete", 1)
 BindEvent(This.oEvents, "ReturnError", This, "HandleError", 1)
@@ -2140,9 +2383,10 @@ lcProcedureFile = Evl(lcProcedureFile, "")
 If This.lMTDLL
 	* Multi-threaded DLL
 	Local loThreadHandler as ThreadHandler of ParallelFox.vcx
-	loThreadHandler = NewObject("ThreadHandler", "ParallelFox.vcx")
+	loThreadHandler = NewObject("ThreadHandler", This.ClassLibrary)
 	This.oThreadHandler = loThreadHandler
 	loThreadHandler.oEvents = This.oEvents
+	loThreadHandler.cWorkerCOMProgID = lcMTDLLProgID 
 	loThreadHandler.StartThread(lcDirectory, This.oParPoolMgr.cWorkerClass, lcWorkerVCX, lcWorkerApp, lcProcedureFile)
 Else 
 	lcWorkerVCX = FullPath(This.oParPoolMgr.cWorkerLibrary)
@@ -2152,16 +2396,6 @@ Else
 	lcWorkerCmd = Textmerge([NewObject("<<This.oParPoolMgr.cWorkerClass>>", "<<lcWorkerVCX>>", "<<lcWorkerApp>>")])
 	This.oWorker = loVFP.Eval(lcWorkerCmd)
 
-	* In Windows XP and earlier, main process can lose focus when 
-	*	instantiating COM EXE. Make sure we keep it.
-	* This issue apparently only affects IDE, and can cause wrong window 
-	*	to get focus at runtime if workers started when main VFP window is not visible.
-	*	So, only applying to IDE.  May revisit if issue presents itself at runtime or other scenarios.
-	If _VFP.StartMode = 0 and Os(3) < "6" and GetForegroundWindow() <> lhWndForeground
-		DECLARE INTEGER SetForegroundWindow IN user32 INTEGER hwnd
-		SetForegroundWindow(lhWndForeground)
-	EndIf
-
 	This.oWorker.SetMainProcess(_VFP, lcWorkerApp)
 	This.oWorker.DoCmd("CD " + lcDirectory)
 	If !Empty(lcProcedureFile)
@@ -2170,7 +2404,7 @@ Else
 	EndIf 
 	This.oWorker.SetWorkerEvents(This.oEvents)
 EndIf 
-
+ 
 ENDPROC
 PROCEDURE complete
 Lparameters lvReturn
@@ -2185,7 +2419,9 @@ BindEvent(This.oEvents, "ReturnError", This, "HandleError", 1)
 This.lComplete = .t.
 *JAL*	This.lBusy = .f.
 *JAL*	This.oParPoolMgr.nBusyWorkers = This.oParPoolMgr.nBusyWorkers - 1 
-This.oParPoolMgr.ProcessQueue()
+If Vartype(This.oParPoolMgr) = "O" and !IsNull(This.oParPoolMgr)
+	This.oParPoolMgr.ProcessQueue()
+EndIf 
 
 ENDPROC
 PROCEDURE handleerror
@@ -2194,6 +2430,37 @@ Lparameters lnError, lcMethod, lnLine, lcMessage, lcCode
 Debugout Time(0), "(" + Transform(This.nWorkerNum) + ")", Program(), lnError, lcMethod, lnLine, lcMessage, lcCode
 
 This.Complete()
+ENDPROC
+PROCEDURE isregistered
+* Check if COM object is registered
+Lparameters lcLookUpKey
+
+* Registry roots
+#DEFINE HKEY_CLASSES_ROOT           -2147483648  && BITSET(0,31)
+#DEFINE HKEY_CURRENT_USER           -2147483647  && BITSET(0,31)+1
+#DEFINE HKEY_LOCAL_MACHINE          -2147483646  && BITSET(0,31)+2
+#DEFINE HKEY_USERS                  -2147483645  && BITSET(0,31)+3
+
+* Load DLLs
+Clear Dlls RegOpenKey
+Clear Dlls RegCloseKey
+LOCAL nHKey,cSubKey,nResult
+DECLARE Integer RegOpenKey IN Win32API ;
+	Integer nHKey, String @cSubKey, Integer @nResult
+DECLARE Integer RegCloseKey IN Win32API ;
+	Integer nHKey
+
+* Try to open key
+Local lnErrorCode, lnSubKey
+lnSubKey = 0
+lnErrorCode = RegOpenKey(HKEY_CLASSES_ROOT,lcLookUpKey,@lnSubKey)
+If lnErrorCode = 0	&& success
+	* Close key
+	=RegCloseKey(lnSubKey)
+	Return .t.
+Else
+	Return .f.
+EndIf 
 ENDPROC
 PROCEDURE sendcommand
 * Send command to worker process.
@@ -2242,6 +2509,7 @@ Class[END RESERVED1]
 [START RESERVED3]
 *complete Fires when worker has finished executing command.
 *handleerror Fires when error returned from worker.
+*isregistered Check if COM object is registered.
 *sendcommand Send command to worker process.
 *stopworker Stop worker process.
 _memberdata XML Metadata for customizable properties
