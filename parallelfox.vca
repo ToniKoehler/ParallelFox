@@ -604,7 +604,7 @@ Pixels[END RESERVED6]
 [START PROPERTIES]
 Name = "parallel"
 _events = NULL
-_memberdata =     1223<VFPData><memberdata name="do" display="Do"/><memberdata name="startworkers" display="StartWorkers"/><memberdata name="cpucount" display="CPUCount"/><memberdata name="setworkercount" display="SetWorkerCount"/><memberdata name="docmd" display="DoCmd"/><memberdata name="execscript" display="ExecScript"/><memberdata name="call" display="Call"/><memberdata name="bindevent" display="BindEvent"/><memberdata name="wait" display="Wait"/><memberdata name="_events" display="_Events"/><memberdata name="callmethod" display="CallMethod"/><memberdata name="stopworkers" display="StopWorkers"/><memberdata name="onerror" display="OnError"/><memberdata name="clearqueue" display="ClearQueue"/><memberdata name="setworkerclass" display="SetWorkerClass"/><memberdata name="detecthyperthreading" display="DetectHyperThreading"/><memberdata name="setmultithreaded" display="SetMultiThreaded"/><memberdata name="oparpoolmgr" display="oParPoolMgr"/><memberdata name="setinstance" display="SetInstance"/><memberdata name="createtemptable" display="CreateTempTable"/><memberdata name="deletetemptable" display="DeleteTempTable"/><memberdata name="cancel" display="Cancel"/><memberdata name="setregfreecom" display="SetRegFreeCOM"/></VFPData>
+_memberdata =     1289<VFPData><memberdata name="do" display="Do"/><memberdata name="startworkers" display="StartWorkers"/><memberdata name="cpucount" display="CPUCount"/><memberdata name="setworkercount" display="SetWorkerCount"/><memberdata name="docmd" display="DoCmd"/><memberdata name="execscript" display="ExecScript"/><memberdata name="call" display="Call"/><memberdata name="bindevent" display="BindEvent"/><memberdata name="wait" display="Wait"/><memberdata name="_events" display="_Events"/><memberdata name="callmethod" display="CallMethod"/><memberdata name="stopworkers" display="StopWorkers"/><memberdata name="onerror" display="OnError"/><memberdata name="clearqueue" display="ClearQueue"/><memberdata name="setworkerclass" display="SetWorkerClass"/><memberdata name="detecthyperthreading" display="DetectHyperThreading"/><memberdata name="setmultithreaded" display="SetMultiThreaded"/><memberdata name="oparpoolmgr" display="oParPoolMgr"/><memberdata name="setinstance" display="SetInstance"/><memberdata name="createtemptable" display="CreateTempTable"/><memberdata name="deletetemptable" display="DeleteTempTable"/><memberdata name="cancel" display="Cancel"/><memberdata name="setregfreecom" display="SetRegFreeCOM"/><memberdata name="checkworkerhealth" display="CheckWorkerHealth"/></VFPData>
 cpucount = 0
 oparpoolmgr = .NULL.
 [END PROPERTIES]
@@ -710,6 +710,31 @@ PROCEDURE cancel
 Debugout Time(0), Program()
 
 This.oParPoolMgr.Cancel()
+ENDPROC
+PROCEDURE checkworkerhealth
+LOCAL lnWorkerItem, lnWorkersAlive, loWorker
+
+lnWorkerItem = 0
+lnWorkerCount = THIS.oParPoolMgr.Workers.Count
+
+FOR lnWorkerItem = 1 TO lnWorkerCount
+	IF TYPE("THIS.oParPoolMgr.Workers.Item(lnWorkerItem).Name") != "C"
+		EXIT 
+	ENDIF 
+	loWorker = THIS.oParPoolMgr.Workers(lnWorkerItem)
+	IF !loWorker.IsWorkerRunning()
+		IF loWorker.lBusy && If worker is idle, don't reduce nBusyWorkers 
+			THIS.oParPoolMgr.nBusyWorkers = MAX(THIS.oParPoolMgr.nBusyWorkers - 1, 0)
+		ENDIF
+		THIS.oParPoolMgr.Workers.REMOVE(lnWorkerItem)
+		THIS.oParPoolMgr.nWorkerCount = THIS.oParPoolMgr.nWorkerCount - 1 
+		lnWorkerItem = lnWorkerItem - 1
+	ENDIF
+NEXT 
+
+lnWorkersAlive = THIS.oParPoolMgr.Workers.COUNT
+
+RETURN lnWorkersAlive
 ENDPROC
 PROCEDURE clearqueue
 * Remove all pending commands from queue.
@@ -925,6 +950,7 @@ Debugout Time(0), Program(), "Start"
 Local lnKey
 lnKey = 0
 Do while .t.
+	This.CheckWorkerHealth()
 	* Sleep() blocks worker processes, so use INKEY() to wait
 	Try 
 		lnKey = Inkey(.1, "H")
@@ -963,6 +989,7 @@ Class[END RESERVED1]
 *call Execute/call function on worker.
 *callmethod Execute/call class method on worker.
 *cancel Clear remaining queue and set IsCancelled property for all workers.
+*checkworkerhealth Check Workers are alive and healthy
 *clearqueue Remove all pending commands from queue.
 *createtemptable Create temporary table that can be used by workers with Worker.OpenTempTable().
 *deletetemptable Delete temporary table previously created with CreateTempTable(). Make sure Worker.CloseTempTable() is used to close table/DBC in workers.
@@ -1404,7 +1431,7 @@ Pixels[END RESERVED6]
 [OBJNAME] threadhandler
 [START PROPERTIES]
 Name = "threadhandler"
-_memberdata =      777<VFPData><memberdata name="nthreadhandle" display="nThreadHandle"/><memberdata name="cmtscript" display="cMTScript"/><memberdata name="neventhandle" display="nEventHandle"/><memberdata name="nthreadid" display="nThreadID"/><memberdata name="startthread" display="StartThread"/><memberdata name="createthread" display="CreateThread"/><memberdata name="cworkercomprogid" display="cWorkerCOMProgID"/><memberdata name="stopthread" display="StopThread"/><memberdata name="release" display="Release"/><memberdata name="lreleaseprocessed" display="lReleaseProcessed"/><memberdata name="oreleasetimer" display="oReleaseTimer"/><memberdata name="sendcommand" display="SendCommand"/><memberdata name="oevents" display="oEvents"/><memberdata name="ocommand" display="oCommand"/></VFPData>
+_memberdata =      839<VFPData><memberdata name="nthreadhandle" display="nThreadHandle"/><memberdata name="cmtscript" display="cMTScript"/><memberdata name="neventhandle" display="nEventHandle"/><memberdata name="nthreadid" display="nThreadID"/><memberdata name="startthread" display="StartThread"/><memberdata name="createthread" display="CreateThread"/><memberdata name="cworkercomprogid" display="cWorkerCOMProgID"/><memberdata name="stopthread" display="StopThread"/><memberdata name="release" display="Release"/><memberdata name="lreleaseprocessed" display="lReleaseProcessed"/><memberdata name="oreleasetimer" display="oReleaseTimer"/><memberdata name="sendcommand" display="SendCommand"/><memberdata name="oevents" display="oEvents"/><memberdata name="ocommand" display="oCommand"/><memberdata name="isthreadrunning" display="IsThreadRunning"/></VFPData>
 cmtscript = 
 cworkercomprogid = ParallelFoxMT.Application
 lreleaseprocessed = .F.
@@ -1464,6 +1491,40 @@ This.nThreadHandle = CreateThreadWithObject( ;
 This.nThreadID = lnThreadID
 
 
+ENDPROC
+PROCEDURE isthreadrunning
+#DEFINE CON_ThreadQueryInformation	0x0040
+#DEFINE CON_ExitCodeStillActive		259
+
+LOCAL llPidOk, llReturn, lnExitCode, lnPid, lnPidMainProcess, lnSuccess, lnThreadHandle
+
+DECLARE INTEGER OpenThread IN kernel32.DLL	;
+	INTEGER dwDesiredAccess, INTEGER bInheritHandle, INTEGER dwThreadId
+DECLARE INTEGER CloseHandle IN kernel32.DLL INTEGER hObject
+DECLARE INTEGER GetExitCodeThread IN kernel32.DLL  ;
+	INTEGER hThread, INTEGER @lpExitCode
+DECLARE INTEGER GetProcessIdOfThread IN kernel32.DLL INTEGER hThread
+
+lnThreadHandle = OpenThread(CON_ThreadQueryInformation, 0, THIS.nThreadID)
+IF lnThreadHandle = 0
+	RETURN .F. && no valid thread (or no access rights)
+ENDIF
+
+lnExitCode = 0
+lnSuccess  = GetExitCodeThread(lnThreadHandle, @lnExitCode)
+IF lnSuccess > 0
+	llPidOk			 = .T.
+	lnPidMainProcess = _VFP.ProcessId	&& check that threadid is child of processid from mainprocess
+	IF VARTYPE(lnPidMainProcess) = "N" AND lnPidMainProcess > 0
+		lnPid	= GetProcessIdOfThread(lnThreadHandle)
+		llPidOk	= (lnPid = lnPidMainProcess)
+	ENDIF
+ENDIF
+CloseHandle(lnThreadHandle)
+
+llReturn = llPidOk AND lnExitCode = CON_ExitCodeStillActive
+
+RETURN llReturn
 ENDPROC
 PROCEDURE release
 * Release thread and object references
@@ -1574,6 +1635,7 @@ Class[END RESERVED1]
 1[END RESERVED2]
 [START RESERVED3]
 *createthread Create thread for MTDLL.
+*isthreadrunning Check that thread is still running
 *release Release thread and object references.
 *sendcommand Send command to worker thread.
 *startthread Start thread for MTDLL worker.
@@ -2259,7 +2321,7 @@ Pixels[END RESERVED6]
 Height = 16
 Name = "workerproxy"
 Width = 99
-_memberdata =      831<VFPData><memberdata name="lbusy" display="lBusy"/><memberdata name="oworker" display="oWorker"/><memberdata name="sendcommand" display="SendCommand"/><memberdata name="complete" display="Complete"/><memberdata name="llocked" display="lLocked"/><memberdata name="ldebugmode" display="lDebugMode"/><memberdata name="stopworker" display="StopWorker"/><memberdata name="handleerror" display="HandleError"/><memberdata name="oevents" display="oEvents"/><memberdata name="oapplication" display="oApplication"/><memberdata name="lcomplete" display="lComplete"/><memberdata name="nworkernum" display="nWorkerNum"/><memberdata name="lmtdll" display="lMTDLL"/><memberdata name="othreadhandler" display="oThreadHandler"/><memberdata name="oparpoolmgr" display="oParPoolMgr"/><memberdata name="isregistered" display="IsRegistered"/></VFPData>
+_memberdata =      893<VFPData><memberdata name="lbusy" display="lBusy"/><memberdata name="oworker" display="oWorker"/><memberdata name="sendcommand" display="SendCommand"/><memberdata name="complete" display="Complete"/><memberdata name="llocked" display="lLocked"/><memberdata name="ldebugmode" display="lDebugMode"/><memberdata name="stopworker" display="StopWorker"/><memberdata name="handleerror" display="HandleError"/><memberdata name="oevents" display="oEvents"/><memberdata name="oapplication" display="oApplication"/><memberdata name="lcomplete" display="lComplete"/><memberdata name="nworkernum" display="nWorkerNum"/><memberdata name="lmtdll" display="lMTDLL"/><memberdata name="othreadhandler" display="oThreadHandler"/><memberdata name="oparpoolmgr" display="oParPoolMgr"/><memberdata name="isregistered" display="IsRegistered"/><memberdata name="isworkerrunning" display="IsWorkerRunning"/></VFPData>
 lbusy = .F.
 lcomplete = .F.
 ldebugmode = .F.
@@ -2462,6 +2524,20 @@ Else
 	Return .f.
 EndIf 
 ENDPROC
+PROCEDURE isworkerrunning
+LOCAL llReturn
+
+DO CASE
+	CASE !THIS.lDebugMode AND !THIS.lMTDLL
+		llReturn = TYPE("This.oApplication.VFP") = "O"
+	CASE !THIS.lDebugMode AND THIS.lMTDLL
+		llReturn = This.oThreadHandler.IsThreadRunning()
+	OTHERWISE
+		llReturn = .T.
+ENDCASE
+
+RETURN llReturn
+ENDPROC
 PROCEDURE sendcommand
 * Send command to worker process.
 Lparameters loCommand as Command of ParallelFox.vcx
@@ -2510,6 +2586,7 @@ Class[END RESERVED1]
 *complete Fires when worker has finished executing command.
 *handleerror Fires when error returned from worker.
 *isregistered Check if COM object is registered.
+*isworkerrunning Check for ParallelFox Application COM object, that it is still running
 *sendcommand Send command to worker process.
 *stopworker Stop worker process.
 _memberdata XML Metadata for customizable properties
