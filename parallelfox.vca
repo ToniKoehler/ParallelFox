@@ -281,6 +281,9 @@ For lnRow =  lnErrorRow to 1 step -1
 	
 EndFor 
 
+* Get Workernum back to main process in case of error | TONI KOEHLER 2025-11-08
+lcCode = lcCode + "<<WorkerNum>>" + IIF(VARTYPE(gnParallelWorkerNum) = "N", TRANSFORM(gnParallelWorkerNum), "MTDLL") + "<</WorkerNum>>" + Chr(13)
+
 Worker.ReturnError(lnError, lcMethod, lnLine, lcMessage, lcCode)
 
 * Exit current code containing error and return to command processor
@@ -723,7 +726,7 @@ FOR lnWorkerItem = 1 TO lnWorkerCount
 	ENDIF 
 	loWorker = THIS.oParPoolMgr.Workers(lnWorkerItem)
 	IF !loWorker.IsWorkerRunning()
-		IF loWorker.lBusy && If worker is idle, don't reduce nBusyWorkers 
+		IF loWorker.lBusy && If worker is idle, don't reduce nBusyWorkers
 			THIS.oParPoolMgr.nBusyWorkers = MAX(THIS.oParPoolMgr.nBusyWorkers - 1, 0)
 		ENDIF
 		THIS.oParPoolMgr.Workers.REMOVE(lnWorkerItem)
@@ -2036,6 +2039,13 @@ EndIf
 ENDPROC
 PROCEDURE Init
 _VFP.Caption = "ParallelFox Worker"
+
+* Set caption with Workernum und ProcessId for better debugging | TONI KOEHLER 2025-11-08
+IF VARTYPE(gnParallelWorkerNum) = "N"
+	_VFP.Caption = _VFP.Caption + ": " + TRANSFORM(gnParallelWorkerNum)	
+	_VFP.Caption = _VFP.Caption + " [" + TRANSFORM(_VFP.ProcessId) + "]"
+ENDIF 
+
 * Make sure ParallelFox.vcx can be found in workers
 Set Path To (JustPath(This.ClassLibrary)) Additive
 * Set Unattended mode unless in debug mode
@@ -2433,6 +2443,11 @@ If InList(Upper(JustExt(lcProcedureFile)), "APP", "EXE")
 Else 
 	lcWorkerApp = ""
 EndIf 
+
+* Helps to identify the worker when using own error handler, e.g. loParallel.BINDEVENT("ReturnError"...)| TONI KOEHLER 2025-11-08
+IF !This.lMTDLL
+	loVFP.SETVAR("gnParallelWorkerNum", THIS.nWorkerNum)
+ENDIF 
 
 * Set up worker events
 This.oEvents = NewObject("Events", This.ClassLibrary)
